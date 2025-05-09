@@ -1,0 +1,87 @@
+﻿@model TrainingAgency.Models.User
+@{
+    ViewData["Title"] = "Chỉnh sửa Học viên";
+}
+
+<div class="container mt-5">
+    <h2>Chỉnh sửa Học viên</h2>
+    <form asp-action="EditStudent" method="post" asp-route-id="@Model.UserId">
+        <div class="mb-3">
+            <label asp-for="FullName" class="form-label">Họ tên</label>
+            <input asp-for="FullName" class="form-control" required />
+            <span asp-validation-for="FullName" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" required />
+            <span asp-validation-for="Email" class="text-danger"></span>
+            <span id="emailFeedback" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Phone" class="form-label">Số điện thoại</label>
+            <input asp-for="Phone" class="form-control" />
+            <span asp-validation-for="Phone" class="text-danger"></span>
+            <span id="phoneFeedback" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="DateOfBirth" class="form-label">NGày sinh</label>
+            <input asp-for="DateOfBirth" type="date" class="form-control" />
+            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        <a class="btn btn-secondary" href="@Url.Action("Index", "Admin")">Hủy</a>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        var userId = '@Model.UserId';
+
+        function toggleSubmitButton() {
+            var dupError = $("#emailFeedback").text().trim().length > 0
+                        || $("#phoneFeedback").text().trim().length > 0;
+            var formValid = $("#editStudentForm").valid();
+
+            if (dupError || !formValid) {
+                $("#submitButton").prop("disabled", true);
+            } else {
+                $("#submitButton").prop("disabled", false);
+            }
+        }
+
+        $(function() {
+            $("#editStudentForm").validate({
+                onkeyup: toggleSubmitButton,
+                onclick: toggleSubmitButton,
+                onfocusout: toggleSubmitButton
+            });
+            toggleSubmitButton();
+        });
+
+        $("#Email").on("blur input", function () {
+            var email = $(this).val().trim();
+            if (email) {
+                $.getJSON('@Url.Action("CheckEmail", "Admin")', { id: userId, email: email }, function (isValid) {
+                    $("#emailFeedback").text(isValid ? "" : "Email đã được sử dụng.");
+                    toggleSubmitButton();
+                });
+            } else {
+                $("#emailFeedback").text("");
+                toggleSubmitButton();
+            }
+        });
+
+        $("#Phone").on("blur input", function () {
+            var phone = $(this).val().trim();
+            if (phone) {
+                $.getJSON('@Url.Action("CheckPhoneNumber", "Admin")', { id: userId, phone: phone }, function (isValid) {
+                    $("#phoneFeedback").text(isValid ? "" : "Số điện thoại đã được sử dụng.");
+                    toggleSubmitButton();
+                });
+            } else {
+                $("#phoneFeedback").text("");
+                toggleSubmitButton();
+            }
+        });
+    </script>
+}

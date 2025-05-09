@@ -1,0 +1,53 @@
+﻿@model TrainingAgency.Models.Course
+@{
+    ViewData["Title"] = "Chỉnh sửa khóa học";
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var state in ViewData.ModelState)
+        {
+            foreach (var error in state.Value.Errors)
+            {
+                <p>@error.ErrorMessage</p>
+            }
+        }
+    </div>
+}
+
+<div class="container mt-5">
+    <h2>Thêm khóa học</h2>
+    <form asp-action="EditCourse" method="post" asp-route-id="@Model.CourseId">
+        <div class="mb-3">
+            <label asp-for="CourseName" class="form-label">Tên khóa học</label>
+            <input asp-for="CourseName" class="form-control" />
+            <span asp-validation-for="CourseName" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="LecturerName" class="form-label">Tên giảng viên</label>
+            <input asp-for="LecturerName" class="form-control" />
+            <span asp-validation-for="LecturerName" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="StartDate" class="form-label">Ngày bắt đầu</label>
+            <input asp-for="StartDate" type="date" class="form-control" />
+            <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Fee" class="form-label">Học phí</label>
+            <input asp-for="Fee" class="form-control" />
+            <span asp-validation-for="Fee" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="MaxStudents" class="form-label">Số lượng sinh viên</label>
+            <input asp-for="MaxStudents" class="form-control" />
+            <span asp-validation-for="MaxStudents" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        <a class="btn btn-secondary" href="@Url.Action("Index", "Admin")">Hủy</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

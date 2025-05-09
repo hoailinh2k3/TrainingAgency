@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "Dashboard Admin";
+    var courses = ViewBag.Courses as IEnumerable<TrainingAgency.Models.Course>;
+    var students = ViewBag.Students as IEnumerable<TrainingAgency.Models.User>;
+    var registrations = ViewBag.Registrations as IEnumerable<TrainingAgency.Models.Registration>;
+}
+
+<div class="container mt-5">
+    <h2>Dashboard Admin</h2>
+    <ul class="nav nav-tabs" id="adminTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="courses-tab" data-bs-toggle="tab" data-bs-target="#courses" type="button" role="tab" aria-controls="courses" aria-selected="true">
+                Quản lý Khóa học
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab" aria-controls="students" aria-selected="false">
+                Quản lý Học viên
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="registrations-tab" data-bs-toggle="tab" data-bs-target="#registrations" type="button" role="tab" aria-controls="registrations" aria-selected="false">
+                Danh sách Đăng ký
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabContent">
+        <div class="tab-pane fade show active" id="courses" role="tabpanel" aria-labelledby="courses-tab">
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <h3 class="mt-3x">Quản lý Khóa học</h3>
+                <a class="btn btn-sm btn-primary" href="@Url.Action("CreateCourse", "Admin")">Thêm khóa học</a>
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Tên khóa học</th>
+                        <th>Giảng viên</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Phí</th>
+                        <th>Số lượng sinh viên</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (courses != null)
+                    {
+                        foreach (var course in courses)
+                        {
+                            <tr>
+                                <td>@course.CourseName</td>
+                                <td>@course.LecturerName</td>
+                                <td>@course.StartDate.ToString("dd-MM-yyyy")</td>
+                                <td>@course.Fee.ToString("N2")</td>
+                                <td>@course.Registrations.Count()/@course.MaxStudents</td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="@Url.Action("EditCourse", "Admin", new { id = course.CourseId })">Chỉnh sửa</a>
+                                    <a class="btn btn-sm btn-danger" href="@Url.Action("DeleteCourse", "Admin", new { id = course.CourseId })" 
+                                        onclick="return confirm('Bạn có chắc muốn xóa khóa học này không?');">Xóa</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab">
+            <h3 class="mt-3">Quản lý Học viên</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Tên đăng nhập</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (students != null)
+                    {
+                        foreach (var student in students)
+                        {
+                            <tr>
+                                <td>@student.Username</td>
+                                <td>@student.FullName</td>
+                                <td>@student.Email</td>
+                                <td>@student.Phone</td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" href="@Url.Action("EditStudent", "Admin", new { id = student.UserId })">Chỉnh sửa</a>
+                                    <a class="btn btn-sm btn-danger" href="@Url.Action("DeleteStudent", "Admin", new { id = student.UserId })" 
+                                        onclick="return confirm('Bạn có chắc muốn xóa học viên này?');">Xóa</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane fade" id="registrations" role="tabpanel" aria-labelledby="registrations-tab">
+            <h3 class="mt-3">Danh sách Đăng ký</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Tên khóa học</th>
+                        <th>Học viên</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (registrations != null)
+                    {
+                        foreach (var reg in registrations)
+                        {
+                            <tr>
+                                <td>@reg.Course.CourseName</td>
+                                <td>@reg.User.FullName</td>
+                                <td>@reg.User.Username</td>
+                                <td>@reg.RegistrationDate.ToString("dd-MM-yyyy")</td>
+                                <td>
+                                    <a class="btn btn-sm btn-danger" href="@Url.Action("DeleteRegistration", "Admin", new { id = reg.RegistrationId })" 
+                                        onclick="return confirm('Bạn có chắc muốn xóa đăng ký này?');">Xóa</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,141 @@
+﻿@{
+    ViewData["Title"] = "Đăng ký";
+}
+<h2>Đăng ký</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<form asp-action="Register" method="post">
+    <div class="form-group mb-3">
+        <label for="username">Tên đăng nhập</label>
+        <input type="text" class="form-control" id="username" name="username" required />
+        <div id="usernameFeedback" class="text-danger"></div>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="email">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required />
+        <div id="emailFeedback" class="text-danger"></div>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="password">Mật khẩu</label>
+        <input type="password" class="form-control" id="password" name="password" required />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="confirmPassword">Xác nhận mật khẩu</label>
+        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required />
+        <div id="passwordFeedback" class="text-danger"></div>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="fullName">Họ tên</label>
+        <input type="text" class="form-control" id="fullName" name="fullName" required />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="phone">Số điện thoại</label>
+        <input type="text" class="form-control" id="phone" name="phone" />
+        <div id="phoneFeedback" class="text-danger"></div>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="dateOfBirth">Ngày sinh</label>
+        <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Đăng ký</button>
+</form>
+
+@section Scripts {
+    <script>
+        function toggleSubmitButton() {
+            var usernameError = $("#usernameFeedback").text().trim();
+            var emailError = $("#emailFeedback").text().trim();
+            var passwordError = $("#passwordFeedback").text().trim();
+            var phoneError = $("#phoneFeedback").text().trim();
+
+            if (usernameError.length > 0 || emailError.length > 0 || passwordError.length > 0 || phoneError.length > 0) {
+                $("button[type=submit]").prop("disabled", true);
+            } else {
+                $("button[type=submit]").prop("disabled", false);
+            }
+        }
+
+        $("#username").on("blur input", function () {
+            var username = $(this).val().trim();
+            if (username) {
+                $.getJSON('@Url.Action("CheckUsername", "Account")', { username: username }, function (data) {
+                    if (!data) {
+                        $("#usernameFeedback").text("Tên đăng nhập đã được sử dụng.");
+                    } else {
+                        $("#usernameFeedback").text("");
+                    }
+                    toggleSubmitButton();
+                });
+            } else {
+                $("#usernameFeedback").text("");
+                toggleSubmitButton();
+            }
+        });
+
+        $("#email").on("blur input", function () {
+            var email = $(this).val().trim();
+            if (email) {
+                $.getJSON('@Url.Action("CheckEmail", "Account")', { email: email }, function (data) {
+                    if (!data) {
+                        $("#emailFeedback").text("Email đã được sử dụng.");
+                    } else {
+                        $("#emailFeedback").text("");
+                    }
+                    toggleSubmitButton();
+                });
+            } else {
+                $("#emailFeedback").text("");
+                toggleSubmitButton();
+            }
+        });
+
+        $("#phone").on("blur input", function () {
+            var phone = $(this).val().trim();
+            if (phone) {
+                $.getJSON('@Url.Action("CheckPhoneNumber", "Account")', { phone: phone }, function (data) {
+                    if (!data) {
+                        $("#phoneFeedback").text("Số điện thoại đã được sử dụng.");
+                    } else {
+                        $("#phoneFeedback").text("");
+                    }
+                    toggleSubmitButton();
+                });
+            } else {
+                $("#phoneFeedback").text("");
+                toggleSubmitButton();
+            }
+        });
+
+        function checkPasswordMatch() {
+            var password = $("#password").val();
+            var confirmPassword = $("#confirmPassword").val();
+            if (password !== confirmPassword) {
+                $("#passwordFeedback").text("Mật khẩu nhập lại không khớp.");
+            } else {
+                $("#passwordFeedback").text("");
+            }
+            toggleSubmitButton();
+        }
+        $("#password, #confirmPassword").on("input", checkPasswordMatch);
+
+        $(document).ready(function(){
+            toggleSubmitButton();
+        });
+    </script>
+}

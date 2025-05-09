@@ -1,0 +1,189 @@
+﻿@model TrainingAgency.Models.User
+@{
+    ViewData["Title"] = "Thông Tin Cá Nhân";
+}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Thông Tin Cá Nhân</h2>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Tên đăng nhập</th>
+                    <td>@Model.Username</td>
+                </tr>
+                <tr>
+                    <th>Họ tên</th>
+                    <td>@Model.FullName</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>@Model.Email</td>
+                </tr>
+                <tr>
+                    <th>Số điện thoại</th>
+                    <td>@Model.Phone</td>
+                </tr>
+                <tr>
+                    <th>Ngày sinh</th>
+                    <td>@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("dd-MM-yyyy") : "")</td>
+                </tr>
+                <tr>
+                    <th>Vai trò</th>
+                    <td>@Model.Role</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-md-4 d-flex flex-column">
+            <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#editInfoModal">
+                Chỉnh sửa thông tin
+            </button>
+            <button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                Đổi mật khẩu
+            </button>
+            <a class="btn btn-danger" href="@Url.Action("LogOut")">Đăng xuất</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editInfoModal" tabindex="-1" aria-labelledby="editInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editInfoModalLabel">Chỉnh sửa thông tin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInfoForm" method="post" action="@Url.Action("Edit", "Account")">
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">Họ tên:</label>
+                        <input type="text" class="form-control" id="fullName" name="fullName" value="@Model.FullName" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" value="@Model.Email" required />
+                        <div id="emailFeedback" class="text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Số điện thoại:</label>
+                        <input type="text" class="form-control" id="phone" name="phone" value="@Model.Phone" />
+                        <div id="phoneFeedback" class="text-danger"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dateOfBirth" class="form-label">Ngày sinh:</label>
+                        <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth"
+                               value="@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("yyyy-MM-dd") : "")" />
+                        <div id="dobFeedback" class="text-danger"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Đổi mật khẩu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm" method="post" action="@Url.Action("ChangePassword", "Account")">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Mật khẩu hiện tại:</label>
+                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required />
+                        @Html.ValidationMessage("currentPassword", "", new { @class = "text-danger" })
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Mật khẩu mới:</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmNewPassword" class="form-label">Xác nhận mật khẩu mới:</label>
+                        <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword" required />
+                        <div id="passwordFeedback" class="text-danger"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleEditSubmitButton() {
+            var emailError = $("#emailFeedback").text().trim();
+            var phoneError = $("#phoneFeedback").text().trim();
+            if (emailError.length > 0 || phoneError.length > 0) {
+                $("#editInfoForm button[type=submit]").attr("disabled", "disabled");
+            } else {
+                $("#editInfoForm button[type=submit]").removeAttr("disabled");
+            }
+        }
+
+        $("#email").on("blur input", function () {
+            var email = $(this).val().trim();
+            if(email){
+                $.getJSON('@Url.Action("CheckEmail", "Account")', { email: email }, function(data){
+                    if (!data) {
+                        $("#emailFeedback").text("Email đã được sử dụng.");
+                    } else {
+                        $("#emailFeedback").text("");
+                    }
+                    toggleEditSubmitButton();
+                });
+            } else {
+                $("#emailFeedback").text("");
+                toggleEditSubmitButton();
+            }
+        });
+
+        $("#phone").on("blur input", function () {
+            var phone = $(this).val().trim();
+            if (phone) {
+                $.getJSON('@Url.Action("CheckPhoneNumber", "Account")', { phone: phone }, function (data) {
+                    if (!data) {
+                        $("#phoneFeedback").text("Số điện thoại đã được sử dụng.");
+                    } else {
+                        $("#phoneFeedback").text("");
+                    }
+                    toggleEditSubmitButton();
+                });
+            } else {
+                $("#phoneFeedback").text("");
+                toggleEditSubmitButton();
+            }
+        });
+
+        function checkPasswordMatch() {
+            var newPass = $("#newPassword").val();
+            var confirmPass = $("#confirmNewPassword").val();
+            if(newPass !== confirmPass){
+                $("#passwordFeedback").text("Mật khẩu mới không khớp.");
+            } else {
+                $("#passwordFeedback").text("");
+            }
+            toggleChangePasswordButton();
+        }
+
+        function toggleChangePasswordButton() {
+            if ($("#passwordFeedback").text().trim().length > 0) {
+                $("#changePasswordForm button[type=submit]").attr("disabled", "disabled");
+            } else {
+                $("#changePasswordForm button[type=submit]").removeAttr("disabled");
+            }
+        }
+
+        $(document).ready(function(){
+            var showModal = '@(ViewBag.ShowChangePasswordModal ?? false)';
+            if (showModal.toLowerCase() === "true") {
+                $("#changePasswordModal").modal('show');
+            }
+        });
+
+        $("#newPassword, #confirmNewPassword").on("input", checkPasswordMatch);
+    </script>
+}
